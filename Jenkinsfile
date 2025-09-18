@@ -28,13 +28,17 @@ pipeline {
         }
 
         stage('Push to DockerHub') {
-            steps {
-                withCredentials([string(credentialsId: 'dockerhub-token', variable: 'DOCKERHUB_PASS')]) {
-                    sh 'echo $DOCKERHUB_PASS | docker login -u $DOCKERHUB_USER --password-stdin'
-                    sh 'docker push $DOCKERHUB_USER/$IMAGE_NAME:latest'
-                }
-            }
+    steps {
+        withCredentials([usernamePassword(
+            credentialsId: 'dockerhub-token', 
+            usernameVariable: 'DOCKERHUB_USER', 
+            passwordVariable: 'DOCKERHUB_PASS'
+        )]) {
+            sh 'echo $DOCKERHUB_PASS | docker login -u $DOCKERHUB_USER --password-stdin'
+            sh 'docker push $DOCKERHUB_USER/$IMAGE_NAME:latest'
         }
+    }
+}
 
         stage('Deploy to Kubernetes') {
             steps {
